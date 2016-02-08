@@ -1,0 +1,149 @@
+//UAB0015Z JOB (BASE0000),'HW1 KHORTON',MSGLEVEL=(1,1),REGION=0M,       
+// NOTIFY=&SYSUID,MSGCLASS=A,CLASS=A                                    
+//****************************                                          
+//COBOL1  EXEC IGYWCLG,                                                 
+// PARM.COBOL='TEST,RENT,APOST,OBJECT,NODYNAM,LIB,SIZE(5048376)'        
+//*ARM.COBOL='TEST,RENT,APOST,OBJECT,NODYNAM,LIB,SIZE(5048376)'         
+//COBOL.SYSPRINT DD SYSOUT=*                                            
+//COBOL.SYSIN DD * //***COBOL CODE GOES HERE                            
+       IDENTIFICATION DIVISION.                                         
+       PROGRAM-ID. HW1.                                                 
+       AUTHOR. KAREN HORTON.                                          
+       * HOMEWORK 1.                                                    
+       ENVIRONMENT DIVISION.                                            
+       CONFIGURATION SECTION.                                           
+       INPUT-OUTPUT SECTION.                                            
+       FILE-CONTROL.                                                    
+           SELECT INPUT-FILE ASSIGN TO DA-S-INPUT.                      
+           SELECT PRNT-FILE ASSIGN TO UR-S-PRNT.                      
+       EJECT                                                            
+       DATA DIVISION.                                                   
+        SKIP3                                                           
+       FILE SECTION.                                                    
+       FD INPUT-FILE                                                    
+           RECORDING MODE IS F                                          
+           BLOCK CONTAINS 0 RECORDS                                     
+           LABEL RECORDS ARE STANDARD.                                  
+       01 INPUT-REC       PIC X(100).                                   
+      * SKIP 2                                                          
+       FD PRNT-FILE                                                     
+           RECORDING MODE IS F                                          
+           LABEL RECORDS ARE OMITTED.                                   
+       01 PRNT-REC        PIC X(132).                                   
+       WORKING-STORAGE SECTION.                                         
+      *******************************************************         
+      *     LAYOUT FOR THE INPUT FILE                    *              
+      *******************************************************           
+       01 INPUT-DATA.                                                   
+          03 I-EMPLOYEEID   PIC X(7).                                   
+          03 I-LNAME        PIC X(15).                                  
+          03 I-FNAME        PIC X(15).                                  
+          03 I-EMPTYPE      PIC X(2).                                   
+          03 I-CLASS        PIC X(17).                                  
+          03 I-SSNO         PIC X(9).                                   
+          03 FILLER         PIC X(24).                                  
+          03 I-SDATE        PIC X(8).                                   
+      *******************************************************           
+      *  LAYOUT FOR THE 1ST DATA INE OF REPORT PRINTING     *           
+      *******************************************************           
+       01 PRNT-DATA1.                                                   
+          03 FILLER         PIC X(2)   VALUE SPACES.                    
+          03 PRNT-SSNO      PIC XXXBXXBXXXX.                            
+          03 FILLER         PIC X(3).                                   
+          03 PRNT-EMPLOYEEID PIC X(7).                                  
+          03 FILLER         PIC X(3).                                   
+          03 PRNT-LNAME     PIC X(15).                                  
+          03 FILLER         PIC X(02).                                  
+          03 PRNT-FNAME     PIC X(15).                                  
+          03 FILLER         PIC X(10).                                  
+          03 PRNT-CLASS     PIC X(17).                                  
+          03 FILLER         PIC X(06).                                
+          03 PRNT-EMPTYPE   PIC X(2).                               
+          03 FILLER         PIC X(06).                                  
+          03 PRNT-SDATE     PIC XXBXXBXXXX.                           
+      *******************************************************           
+      *******************************************************           
+       01 PRNT-HEADING1.                                                
+          03 FILLER         PIC X(54)   VALUE SPACES.                   
+          03 HD1-TITLE    PIC X(32)   VALUE SPACES.                   
+          03 FILLER         PIC X(54)   VALUE SPACES.                   
+       01 PRNT-HEADING2.                                              
+          03 FILLER         PIC X(54)   VALUE SPACES.                   
+          03 HD2-TITLE      PIC X(32)   VALUE SPACES.                   
+          03 FILLER         PIC X(54)   VALUE SPACES.                 
+       01 PRNT-HEADING3.                                                
+          03 FILLER         PIC X(02)   VALUE SPACES.                    
+          03 FILLER         PIC X(14)   VALUE 'SSN'.                     
+          03 FILLER         PIC X(03)   VALUE SPACES.                    
+          03 FILLER         PIC X(07)   VALUE ' EMP ID'.                 
+          03 FILLER         PIC X(03)   VALUE SPACES.                    
+          03 FILLER         PIC X(15)   VALUE ' LAST'.                   
+          03 FILLER         PIC X(3)    VALUE SPACES.                    
+          03 FILLER         PIC X(15)   VALUE '    FIRST'.               
+          03 FILLER         PIC X(10)   VALUE SPACES.                    
+          03 FILLER         PIC X(17)   VALUE 'TITLE'.                  
+          03 FILLER         PIC X(6)    VALUE SPACES.                    
+          03 FILLER         PIC X(08)   VALUE 'TYPE'.                    
+          03 FILLER         PIC X(10)   VALUE 'DATE'.                    
+      *******************************************************            
+      * END OF FILE (EOF) SWITCHES                          *            
+      * 0=NOT AT EOF       1=AT EOF              *                       
+      *******************************************************            
+       01 MISC.                                                          
+          03 EOF-I          PIC 9       VALUE 0.                         
+      *******************************************************            
+      *      START OF PROCEDURE DIVISION                    *            
+      *******************************************************            
+       PROCEDURE DIVISION.                                               
+       000-MAINLINE.                                                     
+           OPEN INPUT INPUT-FILE                                         
+             OUTPUT PRNT-FILE.                                           
+           PERFORM 2000-READ-INPUT.                                       
+           PERFORM 1400-PRINT-HEAD.                                      
+           PERFORM 1500-LOOP                                             
+              UNTIL EOF-I = 1.                                           
+           CLOSE INPUT-FILE                                              
+                 PRNT-FILE.                                              
+           STOP RUN.                                                     
+       1400-PRINT-HEAD.                                                  
+           MOVE 'IBM ACADEMIC INITIATIVE' TO HD1-TITLE.                  
+           WRITE PRNT-REC FROM PRNT-HEADING1                             
+             AFTER ADVANCING PAGE.                                       
+           MOVE 'INTRODUCTION TO COBOL' TO HD2-TITLE.                    
+           WRITE PRNT-REC FROM PRNT-HEADING2                             
+             AFTER ADVANCING 1 LINE.                                     
+           MOVE SPACES TO PRNT-REC.                                      
+           WRITE PRNT-REC                                                
+             AFTER ADVANCING 1 LINE.                                     
+           WRITE PRNT-REC FROM PRNT-HEADING3                             
+             AFTER ADVANCING 1 LINE.                                     
+           MOVE SPACES TO PRNT-REC.                                      
+       1500-LOOP.                                                        
+           PERFORM 1600-PRINT-DETAIL.                                    
+           PERFORM 2000-READ-INPUT.                                      
+      *******************************************************            
+      *      PRINTS THE SCHEDULE INOFMRATION                *            
+      *******************************************************            
+       1600-PRINT-DETAIL.                                                
+           MOVE I-EMPLOYEEID TO PRNT-EMPLOYEEID.                         
+           MOVE I-LNAME      TO PRNT-LNAME.                              
+           MOVE I-FNAME      TO PRNT-FNAME.                              
+           MOVE I-CLASS      TO PRNT-CLASS.                              
+           MOVE I-SSNO       TO PRNT-SSNO.                               
+           INSPECT PRNT-SSNO REPLACING ALL SPACES BY "-".                
+           MOVE I-SDATE      TO PRNT-SDATE.                              
+           INSPECT PRNT-SDATE REPLACING ALL SPACES BY "/".               
+           WRITE PRNT-REC FROM PRNT-DATA1                                
+            AFTER ADVANCING 1 LINE.                                      
+      *******************************************************            
+      *      READ THE INPUT FILE                            *            
+      *******************************************************            
+       2000-READ-INPUT.                                                  
+           READ INPUT-FILE INTO INPUT-DATA                               
+             AT END MOVE 1 TO EOF-I.                                     
+//***THE REST OF THESE GO CARDS GO AFTER YOUR COBOL SOURCE               
+//GO.SYSOUT DD SYSOUT=*                                                  
+//GO.SYSPRINT DD SYSOUT=*                                                
+//GO.INPUT DD DSN=UAB0015.DATA.EMPLOYEE,DISP=SHR                         
+//GO.PRNT DD SYSOUT=*                                                    
+ 
